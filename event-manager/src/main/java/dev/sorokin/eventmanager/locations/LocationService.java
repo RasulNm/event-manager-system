@@ -28,4 +28,15 @@ public class LocationService {
         }
         return domainLocations;
     }
+
+    public Location createLocation(Location location) {
+        if (locationRepository.existsByName(location.name())) {
+            throw new IllegalArgumentException("Location with name " +
+                                               location.name() + " already exists");
+        }
+        var entityLocation = entityConverter.toEntity(location);
+        return entityConverter.toDomain(
+                locationRepository.save(entityLocation)
+        );
+    }
 }

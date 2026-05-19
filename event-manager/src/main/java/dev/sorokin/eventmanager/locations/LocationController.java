@@ -1,7 +1,9 @@
 package dev.sorokin.eventmanager.locations;
 
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,5 +34,18 @@ public class LocationController {
                         .map(dtoConverter::toDto)
                         .toList()
         );
+    }
+
+    @PostMapping
+    public ResponseEntity<LocationDto> createLocation(
+            @RequestBody @Valid LocationDto locationToCreate
+    ) {
+        log.info("Creating location: {}", locationToCreate);
+        Location createdLocation = locationService.createLocation(
+                dtoConverter.toDomain(locationToCreate)
+        );
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(dtoConverter.toDto(createdLocation));
     }
 }
