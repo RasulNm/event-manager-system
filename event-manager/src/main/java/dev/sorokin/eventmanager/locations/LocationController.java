@@ -73,4 +73,15 @@ public class LocationController {
                 .status(HttpStatus.OK)
                 .body(dtoConverter.toDto(updatedLocation));
     }
+
+    @DeleteMapping("/{locationId}")
+    public ResponseEntity<Void> deleteLocation(
+            @PathVariable("locationId") Long locationId
+    ) {
+        log.info("Deleting location by id: {}", locationId);
+        locationService.deleteLocation(locationId);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
 }

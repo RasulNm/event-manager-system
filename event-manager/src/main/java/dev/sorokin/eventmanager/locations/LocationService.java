@@ -73,4 +73,13 @@ public class LocationService {
                 locationRepository.findById(id).orElseThrow()
         );
     }
+
+    public void deleteLocation(Long id) {
+        if (!locationRepository.existsById(id)) {
+            throw new EntityNotFoundException("Not found location with id=%s"
+                    .formatted(id)
+            );
+        }
+        locationRepository.deleteById(id);
+    }
 }
