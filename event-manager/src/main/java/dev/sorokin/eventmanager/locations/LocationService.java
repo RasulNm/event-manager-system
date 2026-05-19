@@ -2,6 +2,7 @@ package dev.sorokin.eventmanager.locations;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,5 +48,29 @@ public class LocationService {
                         "Not found location with id=%s".formatted(id)
                 ));
         return entityConverter.toDomain(foundLocation);
+    }
+
+    @Transactional
+    public Location updateLocation(
+            Long id,
+            Location locationToUpdate
+    ) {
+        int updatedCount = locationRepository.updateLocation(
+                id,
+                locationToUpdate.name(),
+                locationToUpdate.address(),
+                locationToUpdate.capacity(),
+                locationToUpdate.description()
+        );
+
+        if (updatedCount == 0) {
+            throw new EntityNotFoundException("Not found location with id=%s"
+                    .formatted(id)
+            );
+        }
+
+        return entityConverter.toDomain(
+                locationRepository.findById(id).orElseThrow()
+        );
     }
 }

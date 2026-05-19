@@ -59,4 +59,18 @@ public class LocationController {
                 .status(HttpStatus.OK)
                 .body(dtoConverter.toDto(foundLocation));
     }
+
+    @PutMapping("/{locationId}")
+    public ResponseEntity<LocationDto> updateLocation(
+            @PathVariable("locationId") Long locationId,
+            @RequestBody @Valid LocationDto locationDtoToUpdate
+    ) {
+        log.info("Updating location by id: {}", locationId);
+        var updatedLocation = locationService.updateLocation(
+                locationId,
+                dtoConverter.toDomain(locationDtoToUpdate));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(dtoConverter.toDto(updatedLocation));
+    }
 }
