@@ -1,5 +1,6 @@
 package dev.sorokin.eventmanager.locations;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,5 +39,13 @@ public class LocationService {
         return entityConverter.toDomain(
                 locationRepository.save(entityLocation)
         );
+    }
+
+    public Location findById(Long id) {
+        var foundLocation = locationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Not found location with id=%s".formatted(id)
+                ));
+        return entityConverter.toDomain(foundLocation);
     }
 }

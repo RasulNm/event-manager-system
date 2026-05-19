@@ -48,4 +48,15 @@ public class LocationController {
                 .status(HttpStatus.CREATED)
                 .body(dtoConverter.toDto(createdLocation));
     }
+
+    @GetMapping("/{locationId}")
+    public ResponseEntity<LocationDto> getLocation(
+            @PathVariable("locationId") Long locationId
+    ) {
+        log.info("Getting location by id: {}", locationId);
+        var foundLocation = locationService.findById(locationId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(dtoConverter.toDto(foundLocation));
+    }
 }
