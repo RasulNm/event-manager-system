@@ -4,7 +4,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,13 +21,10 @@ public class LocationService {
     }
 
     public List<Location> getLocations() {
-        var foundLocations = locationRepository.findAll();
-
-        List<Location> domainLocations = new ArrayList<>();
-        for (var location : foundLocations) {
-            domainLocations.add(entityConverter.toDomain(location));
-        }
-        return domainLocations;
+        return locationRepository.findAll()
+                .stream()
+                .map(entityConverter::toDomain)
+                .toList();
     }
 
     public Location createLocation(Location location) {
@@ -44,9 +40,10 @@ public class LocationService {
 
     public Location findById(Long id) {
         var foundLocation = locationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Not found location with id=%s".formatted(id)
-                ));
+                .orElseThrow(() -> {
+                    throwEntityNotFoundException(id);
+                    return null;
+                });
         return entityConverter.toDomain(foundLocation);
     }
 
@@ -64,9 +61,7 @@ public class LocationService {
         );
 
         if (updatedCount == 0) {
-            throw new EntityNotFoundException("Not found location with id=%s"
-                    .formatted(id)
-            );
+            throwEntityNotFoundException(id);
         }
 
         return entityConverter.toDomain(
@@ -76,10 +71,13 @@ public class LocationService {
 
     public void deleteLocation(Long id) {
         if (!locationRepository.existsById(id)) {
-            throw new EntityNotFoundException("Not found location with id=%s"
-                    .formatted(id)
-            );
+            throwEntityNotFoundException(id);
         }
         locationRepository.deleteById(id);
+    }
+
+    private void throwEntityNotFoundException(Long id) {
+        throw new EntityNotFoundException("Not found location with id=%s"
+                .formatted(id));
     }
 }

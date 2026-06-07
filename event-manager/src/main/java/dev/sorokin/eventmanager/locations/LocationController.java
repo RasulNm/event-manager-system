@@ -29,11 +29,11 @@ public class LocationController {
     public ResponseEntity<List<LocationDto>> getLocations() {
         log.info("Getting locations");
         var allLocations = locationService.getLocations();
-        return ResponseEntity.ok(
-                allLocations.stream()
+        return ResponseEntity
+                .ok(allLocations.stream()
                         .map(dtoConverter::toDto)
                         .toList()
-        );
+                );
     }
 
     @PostMapping
