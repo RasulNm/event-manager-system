@@ -28,3 +28,8 @@ logging:
 springdoc:
   swagger-ui:
     path: /swagger-ui/index.html
+    url: /openapi.yaml
+
+admin:
+  username: admin
+  password: admin
