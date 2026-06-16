@@ -1,6 +1,5 @@
 package dev.sorokin.eventmanager.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.sorokin.eventmanager.errors.ErrorMessageResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,7 +7,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
@@ -20,10 +18,10 @@ import java.time.LocalDateTime;
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     private static final Logger log = LoggerFactory.getLogger(CustomAccessDeniedHandler.class);
-    private final ObjectMapper objectMapper;
+    private final SecurityResponseSender securityResponseSender;
 
-    public CustomAccessDeniedHandler(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public CustomAccessDeniedHandler(SecurityResponseSender securityResponseSender) {
+        this.securityResponseSender = securityResponseSender;
     }
 
     @Override
@@ -39,13 +37,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
                 accessDeniedException.getMessage(),
                 LocalDateTime.now()
         );
-        var stringResponse = objectMapper.writeValueAsString(messageResponse);
 
-        // кодировка ответа в UTF-8, чтобы корректно отображать русские символы
-        response.setCharacterEncoding("UTF-8");
-
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        response.getWriter().write(stringResponse);
+        securityResponseSender.sendError(response, HttpStatus.FORBIDDEN, messageResponse);
     }
 }

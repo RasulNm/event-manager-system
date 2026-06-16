@@ -1,6 +1,5 @@
 package dev.sorokin.eventmanager.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.sorokin.eventmanager.errors.ErrorMessageResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,7 +7,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -20,10 +18,10 @@ import java.time.LocalDateTime;
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private static final Logger log = LoggerFactory.getLogger(CustomAuthenticationEntryPoint.class);
-    private final ObjectMapper objectMapper;
+    private final SecurityResponseSender securityResponseSender;
 
-    public CustomAuthenticationEntryPoint(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public CustomAuthenticationEntryPoint(SecurityResponseSender securityResponseSender) {
+        this.securityResponseSender = securityResponseSender;
     }
 
     @Override
@@ -39,12 +37,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                 authException.getMessage(),
                 LocalDateTime.now()
         );
-        var stringResponse = objectMapper.writeValueAsString(messageResponse);
 
-        response.setCharacterEncoding("UTF-8");
-
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.getWriter().write(stringResponse);
+        securityResponseSender.sendError(response, HttpStatus.UNAUTHORIZED, messageResponse);
     }
 }

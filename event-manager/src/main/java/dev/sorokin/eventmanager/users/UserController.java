@@ -15,13 +15,16 @@ public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
     private final JwtAuthenticationService jwtAuthenticationService;
+    private final UserDtoConverter dtoConverter;
 
     public UserController(
             UserService userService,
-            JwtAuthenticationService jwtAuthenticationService
+            JwtAuthenticationService jwtAuthenticationService,
+            UserDtoConverter dtoConverter
     ) {
         this.userService = userService;
         this.jwtAuthenticationService = jwtAuthenticationService;
+        this.dtoConverter = dtoConverter;
     }
 
 
@@ -34,7 +37,7 @@ public class UserController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new UserDto(user.id(), user.login(), user.age(), user.role()));
+                .body(dtoConverter.toDto(user));
     }
 
     @PostMapping("/auth")
@@ -56,6 +59,6 @@ public class UserController {
         var foundUser = userService.findById(userId);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(new UserDto(foundUser.id(), foundUser.login(), foundUser.age(), foundUser.role()));
+                .body(dtoConverter.toDto(foundUser));
     }
 }
