@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,6 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private final CustomUserDetailsService userDetailsService;
@@ -61,6 +63,20 @@ public class SecurityConfiguration {
                             .permitAll()
                             .requestMatchers(HttpMethod.GET, "/users/**")
                             .hasAnyAuthority("ADMIN")
+
+                            .requestMatchers(HttpMethod.POST, "/events")
+                            .hasAnyAuthority("USER")
+                            .requestMatchers(HttpMethod.DELETE, "/events/**")
+                            .authenticated()
+                            .requestMatchers(HttpMethod.GET, "/events/my")
+                            .hasAnyAuthority("USER")
+                            .requestMatchers(HttpMethod.GET, "/events/{eventId}")
+                            .hasAnyAuthority("ADMIN", "USER")
+                            .requestMatchers(HttpMethod.PUT, "/events/**")
+                            .authenticated()
+                            .requestMatchers(HttpMethod.POST, "/events/**")
+                            .hasAnyAuthority("ADMIN", "USER")
+
 
                             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/openapi.yaml")
                             .permitAll()
