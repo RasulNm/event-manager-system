@@ -97,4 +97,23 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
     List<EventEntity> findAllByParticipantOwnerId(
             @Param("ownerId") Long userId
     );
+
+    @Query(value = """
+            SELECT MAX(e.max_places)
+            FROM events e
+            WHERE e.location_id = :locationId
+            AND status != 'CANCELLED'
+            """, nativeQuery = true)
+    int findMaxRequiredPlacesByLocationId(
+            @Param("locationId") Long id
+    );
+
+    @Query(value = """
+            SELECT COUNT(*)
+            FROM events e
+            WHERE e.location_id = :locationId
+            """, nativeQuery = true)
+    int countByLocationId(
+            @Param("locationId") Long id
+    );
 }
