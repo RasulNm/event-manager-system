@@ -63,4 +63,38 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
     );
 
     List<EventEntity> findAllByOwnerId(Long ownerId);
+
+    @Modifying
+    @Query(value = """
+            UPDATE events
+            SET occupied_places = occupied_places + 1
+            WHERE id = :eventId
+            AND status = 'WAIT_START'
+            AND max_places > occupied_places
+            """, nativeQuery = true)
+    int incrementOccupiedPlaces(
+            @Param("eventId") Long eventId
+    );
+
+    @Modifying
+    @Query(value = """
+            UPDATE events
+            SET occupied_places = occupied_places - 1
+            WHERE id = :eventId
+            AND status = 'WAIT_START'
+            AND occupied_places > 0
+            """, nativeQuery = true)
+    int decrementOccupiedPlaces(
+            @Param("eventId") Long eventId
+    );
+
+    @Query(value = """
+            SELECT e.*
+            FROM events e 
+            JOIN registrations r ON(e.id = r.event_id)
+            WHERE r.user_id = :ownerId
+            """, nativeQuery = true)
+    List<EventEntity> findAllByParticipantOwnerId(
+            @Param("ownerId") Long userId
+    );
 }

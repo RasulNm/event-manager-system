@@ -66,7 +66,7 @@ public class SecurityConfiguration {
 
                             .requestMatchers(HttpMethod.POST, "/events")
                             .hasAnyAuthority("USER")
-                            .requestMatchers(HttpMethod.DELETE, "/events/**")
+                            .requestMatchers(HttpMethod.DELETE, "/events/{eventId}")
                             .authenticated()
                             .requestMatchers(HttpMethod.GET, "/events/my")
                             .hasAnyAuthority("USER")
@@ -74,9 +74,15 @@ public class SecurityConfiguration {
                             .hasAnyAuthority("ADMIN", "USER")
                             .requestMatchers(HttpMethod.PUT, "/events/**")
                             .authenticated()
-                            .requestMatchers(HttpMethod.POST, "/events/**")
+                            .requestMatchers(HttpMethod.POST, "/events/search")
                             .hasAnyAuthority("ADMIN", "USER")
 
+                            .requestMatchers(HttpMethod.POST, "/events/registrations/{eventId}")
+                            .hasAnyAuthority("USER")
+                            .requestMatchers(HttpMethod.DELETE, "/events/registrations/cancel/{eventId}")
+                            .hasAnyAuthority("USER")
+                            .requestMatchers(HttpMethod.GET, "/events/registrations/my")
+                            .hasAnyAuthority("USER")
 
                             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/openapi.yaml")
                             .permitAll()
