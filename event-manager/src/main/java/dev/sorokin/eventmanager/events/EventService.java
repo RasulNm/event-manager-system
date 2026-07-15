@@ -29,6 +29,7 @@ public class EventService {
         this.locationRepository = locationRepository;
     }
 
+    @Transactional
     public Event createEvent(Event eventToCreate) {
         if (eventToCreate.id() != null) {
             throw new IllegalArgumentException("Event ID must be null for creation");
@@ -152,6 +153,28 @@ public class EventService {
         if (event.maxPlaces() > locationEntity.getCapacity()) {
             throw new IllegalArgumentException("Event seats (%d) exceed location capacity (%d)"
                     .formatted(event.maxPlaces(), locationEntity.getCapacity()));
+        }
+    }
+
+    @Transactional
+    public void moveWaitStartToStarted() {
+        List<EventEntity> events = eventRepository.findByStatus(EventStatus.WAIT_START.name());
+
+        for (EventEntity event : events) {
+            if(event.getDate().isBefore(LocalDateTime.now())) {
+                event.setStatus(EventStatus.STARTED.name());
+            }
+        }
+    }
+
+    @Transactional
+    public void moveStartedToFinished() {
+        List<EventEntity> events = eventRepository.findByStatus(EventStatus.STARTED.name());
+
+        for (EventEntity event : events) {
+            if(event.getDate().plusMinutes(1).isBefore(LocalDateTime.now())) {
+                event.setStatus(EventStatus.FINISHED.name());
+            }
         }
     }
 }

@@ -116,4 +116,6 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
     int countByLocationId(
             @Param("locationId") Long id
     );
+
+    List<EventEntity> findByStatus(String name);
 }
