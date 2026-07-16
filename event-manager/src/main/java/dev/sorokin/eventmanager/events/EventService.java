@@ -90,6 +90,8 @@ public class EventService {
             Long eventId,
             Event eventToUpdate
     ) {
+        validateLocationCapacity(eventToUpdate);
+
         eventRepository.updateEvent(
                 eventId,
                 eventToUpdate.name(),
@@ -102,9 +104,7 @@ public class EventService {
         EventEntity eventEntity = eventRepository.findById(eventId)
                 .orElseThrow(() -> throwEventNotFoundException(eventId));
 
-        Event event = entityConverter.toDomain(eventEntity);
-        validateLocationCapacity(event);
-        return event;
+        return entityConverter.toDomain(eventEntity);
     }
 
     public List<Event> searchEvents(EventSearchRequestDto filter) {
@@ -157,23 +157,17 @@ public class EventService {
     }
 
     @Transactional
-    public void moveWaitStartToStarted() {
-        List<EventEntity> events = eventRepository.findByStatus(EventStatus.WAIT_START.name());
+    public void changeStatus(EventStatus fromStatus, EventStatus toStatus) {
+        List<EventEntity> events = eventRepository.findByStatus(fromStatus.name());
 
         for (EventEntity event : events) {
-            if(event.getDate().isBefore(LocalDateTime.now())) {
-                event.setStatus(EventStatus.STARTED.name());
-            }
-        }
-    }
-
-    @Transactional
-    public void moveStartedToFinished() {
-        List<EventEntity> events = eventRepository.findByStatus(EventStatus.STARTED.name());
-
-        for (EventEntity event : events) {
-            if(event.getDate().plusMinutes(1).isBefore(LocalDateTime.now())) {
-                event.setStatus(EventStatus.FINISHED.name());
+            boolean shouldChange = switch (fromStatus) {
+                case EventStatus.WAIT_START -> event.getDate().isBefore(LocalDateTime.now());
+                case EventStatus.STARTED -> event.getDate().plusMinutes(1).isBefore(LocalDateTime.now());
+                default -> false;
+            };
+            if (shouldChange) {
+                event.setStatus(toStatus.name());
             }
         }
     }

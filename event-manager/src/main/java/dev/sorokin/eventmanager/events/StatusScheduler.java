@@ -18,15 +18,15 @@ public class StatusScheduler {
 
     @Scheduled(fixedDelayString = "${task.fixed-delay-millis}")
     public void moveWaitStartToStarted() {
-        log.info("Starting WAIT_START -> STARTED processing");
-        eventService.moveWaitStartToStarted();
-        log.info("WAIT_START -> STARTED processing completed");
+        log.info("Starting {} -> {} processing", EventStatus.WAIT_START, EventStatus.STARTED);
+        eventService.changeStatus(EventStatus.WAIT_START, EventStatus.STARTED);
+        log.info("{} -> {} processing completed", EventStatus.WAIT_START, EventStatus.STARTED);
     }
 
     @Scheduled(fixedDelayString = "${task.fixed-delay-millis}")
     public void moveStartedToFinished() {
-        log.info("Starting STARTED -> FINISHED processing");
-        eventService.moveStartedToFinished();
-        log.info("STARTED -> FINISHED processing completed");
+        log.info("Starting {} -> {} processing", EventStatus.STARTED, EventStatus.FINISHED);
+        eventService.changeStatus(EventStatus.STARTED, EventStatus.FINISHED);
+        log.info("{} -> {} processing completed", EventStatus.STARTED, EventStatus.FINISHED);
     }
 }
