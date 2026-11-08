@@ -19,6 +19,10 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/db/changelog/changelog-master.yaml
+  task:
+    scheduling:
+      pool:
+        size: 3
 
 logging:
   level:
@@ -37,3 +41,6 @@ jwt:
 admin:
   username: admin
   password: admin
+
+task:
+  fixed-delay-millis: 10000

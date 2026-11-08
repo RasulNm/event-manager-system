@@ -1,5 +1,6 @@
 package dev.sorokin.eventmanager.locations;
 
+import dev.sorokin.eventmanager.events.EventRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,13 +12,16 @@ public class LocationService {
 
     private final LocationEntityConverter entityConverter;
     private final LocationRepository locationRepository;
+    private final EventRepository eventRepository;
 
     public LocationService(
             LocationEntityConverter entityConverter,
-            LocationRepository locationRepository
+            LocationRepository locationRepository,
+            EventRepository eventRepository
     ) {
         this.entityConverter = entityConverter;
         this.locationRepository = locationRepository;
+        this.eventRepository = eventRepository;
     }
 
     public List<Location> getLocations() {
@@ -52,6 +56,13 @@ public class LocationService {
             Long id,
             Location locationToUpdate
     ) {
+        int maxRequiredPlaces = eventRepository.findMaxRequiredPlacesByLocationId(id);
+
+        if(locationToUpdate.capacity() < maxRequiredPlaces) {
+            throw new IllegalArgumentException("Нельзя уменьшить вместимость локации до %s, так как существующие мероприятия требуют до %s мест"
+                    .formatted(locationToUpdate.capacity(), maxRequiredPlaces));
+        }
+
         int updatedCount = locationRepository.updateLocation(
                 id,
                 locationToUpdate.name(),
@@ -72,6 +83,12 @@ public class LocationService {
     public void deleteLocation(Long id) {
         if (!locationRepository.existsById(id)) {
             throwEntityNotFoundException(id);
+        }
+
+        int eventsCount = eventRepository.countByLocationId(id);
+        if(eventsCount > 0) {
+            throw new IllegalArgumentException("Нельзя удалить локацию с id=%s, так как к ней привязаны мероприятия (eventsCount=%s)"
+                    .formatted(id, eventsCount));
         }
         locationRepository.deleteById(id);
     }
